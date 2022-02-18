@@ -8,6 +8,7 @@ A efficient, high-performance python technical analysis library written in Rust 
 - EMA
 - RSI
 - MACD
+- ROC
 
 ## Speed
 On average, I found the Panther calculations of these indicators to be about 9x or 900% faster than the industry standard way of calculating these indicators using Pandas. Don't believe me? Install the library and run the tests in the speed_tests directory to see it for yourself :)
