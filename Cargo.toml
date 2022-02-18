@@ -8,4 +8,5 @@ name = "panther"
 crate-type = ["cdylib"]
 
 [dependencies]
+pyo3 = { version = "0.12.3", features = ["extension-module"] }
 numpy = "0.15"
