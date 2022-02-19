@@ -13,9 +13,9 @@ A efficient, high-performance python technical analysis library written in Rust 
 ## How to build
 - Run `cargo build --release` from the main directory.
 - Get the generated dll from the target/release directory.
-- Rename extension from .dll to .pyd
-- Place in the same folder as script 
-- Put `from panther import *` in script
+- Rename extension from .dll to .pyd.
+- Place .pyd file in the same folder as script. 
+- Put `from panther import *` in python script.
  
 ## Speed
 On average, I found the Panther calculations of these indicators to be about 9x or 900% faster than the industry standard way of calculating these indicators using Pandas. Don't believe me? Install the library and run the tests in the speed_tests directory to see it for yourself :)
@@ -23,7 +23,7 @@ On average, I found the Panther calculations of these indicators to be about 9x 
 ## License
 MIT License
 
-Copyright (c) 2022 Greg
+Copyright (c) 2022 Greg James
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
