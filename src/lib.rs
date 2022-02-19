@@ -113,9 +113,37 @@ fn roc(price: Vec<f32>, period: usize) -> PyResult<Vec<f32>> {
     Ok(Array::to_vec(&result))
 }
 
+#[pyfunction]
+fn atr(high: Vec<f32>, low: Vec<f32>, close: Vec<f32>, period: usize) -> PyResult<Vec<f32>> {
+    let length = high.len();
+    let high_ndarray = Array::from_vec(high);
+    let low_ndarray = Array::from_vec(low);
+    let close_ndarray = Array::from_vec(close);
+    let mut tr  = Array1::<f32>::zeros(length);
+    let mut result = Array1::<f32>::zeros(length - period + 1);
+    
+    tr[0] = high_ndarray[0]-low_ndarray[0];
+    for i in 1..high_ndarray.len() {
+        let hl = high_ndarray[i] - low_ndarray[i];
+        let hpc = (high_ndarray[i] - close_ndarray[i-1]).abs();
+        let lpc = (low_ndarray[i] - close_ndarray[i-1]).abs();
+        tr[i] = f32::max(f32::max(hl, hpc), lpc);
+    }
+
+
+    result[0] = tr.slice(s![0..period]).sum()/period as f32;
+
+    for i in 1.. length -period+1 {
+        result[i] = (result[i-1]*(period as f32-1.0)+tr[i+period-1])/period as f32;
+    }
+    Ok(Array::to_vec(&result))
+}
+
+
 #[pymodule]
 fn panther(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sma, m)?)?;
+    m.add_function(wrap_pyfunction!(atr, m)?)?;
     m.add_function(wrap_pyfunction!(ema, m)?)?;
     m.add_function(wrap_pyfunction!(rsi, m)?)?;
     m.add_function(wrap_pyfunction!(roc, m)?)?;

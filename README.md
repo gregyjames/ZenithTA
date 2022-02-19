@@ -4,6 +4,7 @@
 A efficient, high-performance python technical analysis library written in Rust using PyO3 and rust-numpy. 
 
 ## Indicators
+- ATR
 - SMA
 - EMA
 - RSI
