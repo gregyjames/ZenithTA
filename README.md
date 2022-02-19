@@ -5,6 +5,7 @@ A efficient, high-performance python technical analysis library written in Rust 
 
 ## Indicators
 - ATR
+- CMF
 - SMA
 - EMA
 - RSI

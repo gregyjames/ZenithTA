@@ -139,10 +139,31 @@ fn atr(high: Vec<f32>, low: Vec<f32>, close: Vec<f32>, period: usize) -> PyResul
     Ok(Array::to_vec(&result))
 }
 
+#[pyfunction]
+fn cmf(high: Vec<f32>, low: Vec<f32>, close: Vec<f32>, volume: Vec<f32>, period: usize) -> PyResult<Vec<f32>> {
+    let length = high.len();
+    let high_ndarray = Array::from_vec(high);
+    let low_ndarray = Array::from_vec(low);
+    let close_ndarray = Array::from_vec(close);
+    let volume_ndarray = Array::from_vec(volume);
+    let mut result = Array1::<f32>::zeros(length - period + 1);
+
+    let a = (&close_ndarray)-(&low_ndarray);
+    let b = (&high_ndarray)-(&close_ndarray);
+    let c = (&high_ndarray)-(&low_ndarray);
+
+    let mfv = ((a-b)/c)*period as f32;
+    for i in 0..length-period+1 {
+        result[i] =  mfv.slice(s![i..i+period]).sum()/ volume_ndarray.slice(s![i..i+period]).sum();
+    }
+
+    Ok(Array::to_vec(&result))
+}
 
 #[pymodule]
 fn panther(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sma, m)?)?;
+    m.add_function(wrap_pyfunction!(cmf, m)?)?;
     m.add_function(wrap_pyfunction!(atr, m)?)?;
     m.add_function(wrap_pyfunction!(ema, m)?)?;
     m.add_function(wrap_pyfunction!(rsi, m)?)?;
