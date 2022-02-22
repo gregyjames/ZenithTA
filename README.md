@@ -12,7 +12,7 @@ A efficient, high-performance python technical analysis library written in Rust 
 - MACD
 - ROC
 
-## How to build
+## How to build (Windows)
 - Run `cargo build --release` from the main directory.
 - Get the generated dll from the target/release directory.
 - Rename extension from .dll to .pyd.
