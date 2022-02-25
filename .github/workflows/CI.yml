@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          architecture: x64
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          default: true
+      - name: Build wheels - x86_64
+        uses: messense/maturin-action@v1
+        with:
+          target: x86_64
+          args: --release --out dist
+      - name: Install built wheel - x86_64
+        run: |
+          pip install numpy
+          pip install panther --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import panther'
+      - name: Build wheels - universal2
+        uses: messense/maturin-action@v1
+        with:
+          args: --release --universal2 --out dist --no-sdist
+      - name: Install built wheel - universal2
+        run: |
+          pip install panther --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import panther'
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [x64, x86]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          architecture: ${{ matrix.target }}
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          default: true
+      - name: Build wheels
+        uses: messense/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist --no-sdist
+      - name: Install built wheel
+        run: |
+          pip install numpy
+          pip install panther --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import panther'
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64, i686]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+        architecture: x64
+    - name: Build wheels
+      uses: messense/maturin-action@v1
+      with:
+        rust-toolchain: nightly
+        target: ${{ matrix.target }}
+        manylinux: auto
+        args: --release --out dist --no-sdist
+    - name: Install built wheel
+      if: matrix.target == 'x86_64'
+      run: |
+        pip install numpy
+        pip install panther --no-deps --no-index --find-links dist --force-reinstall
+        python -c 'import panther'
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+
+  linux-cross:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [aarch64, armv7, s390x, ppc64le]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Build wheels
+      uses: messense/maturin-action@v1
+      with:
+        rust-toolchain: nightly
+        target: ${{ matrix.target }}
+        manylinux: auto
+        args: --release --out dist --no-sdist
+    - uses: uraimo/run-on-arch-action@v2.0.5
+      name: Install built wheel
+      if: matrix.target == 'aarch64'
+      with:
+        arch: ${{ matrix.target }}
+        distro: ubuntu20.04
+        githubToken: ${{ github.token }}
+        install: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 python3-pip
+          pip3 install -U pip numpy
+        run: |
+          pip3 install panther --no-deps --no-index --find-links dist/ --force-reinstall
+          python3 -c 'import panther'
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
+    needs: [ macos, windows, linux, linux-cross ]
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+      - name: Publish to PyPi
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        uses: messense/maturin-action@v1
+        with:
+          command: upload
+          args: --skip-existing *
