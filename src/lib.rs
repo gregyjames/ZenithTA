@@ -42,15 +42,18 @@ fn sma(price: Vec<f32>, period: usize) -> PyResult<Vec<f32>> {
 }
 
 #[pyfunction]
-fn ema(price: Vec<f32>, period: usize) -> PyResult<Vec<f32>>{
+fn ema(price: Vec<f32>, period: usize, smoothing: f32) -> PyResult<Vec<f32>> {
     let price_ndarray = Array::from_vec(price);
-    let length = price_ndarray.len() - period +1;
+    let length = price_ndarray.len();
     let mut result = Array1::<f32>::zeros(length);
-    result[0] = price_ndarray.slice(s![0..period]).sum();
-    for i in 1..length{
-        result[i] = result[i-1]+(price_ndarray[i+period-1]-result[i-1])*(2.0/((period as f32)+1.0));
-    }
     
+    let weight = smoothing / (period + 1) as f32;
+    result[0] = price_ndarray[0];
+
+    for i in 1..length {
+        result[i] = (price_ndarray[i]*weight) + (result[i-1] * (1.0-weight));
+    }
+
     Ok(Array::to_vec(&result))
 }
 
