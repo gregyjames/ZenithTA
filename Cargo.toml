@@ -1,10 +1,10 @@
 [package]
-name = "panther"
+name = "ZenithTA"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "panther"
+name = "ZenithTA"
 crate-type = ["cdylib"]
 
 [dependencies]

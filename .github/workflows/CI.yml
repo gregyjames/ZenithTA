@@ -31,16 +31,16 @@ jobs:
       - name: Install built wheel - x86_64
         run: |
           pip install numpy
-          pip install panther --no-deps --no-index --find-links dist --force-reinstall
-          python -c 'import panther'
+          pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import ZenithTA'
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
           args: --release --universal2 --out dist --no-sdist
       - name: Install built wheel - universal2
         run: |
-          pip install panther --no-deps --no-index --find-links dist --force-reinstall
-          python -c 'import panther'
+          pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import ZenithTA'
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -72,8 +72,8 @@ jobs:
       - name: Install built wheel
         run: |
           pip install numpy
-          pip install panther --no-deps --no-index --find-links dist --force-reinstall
-          python -c 'import panther'
+          pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
+          python -c 'import ZenithTA'
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -102,8 +102,8 @@ jobs:
       if: matrix.target == 'x86_64'
       run: |
         pip install numpy
-        pip install panther --no-deps --no-index --find-links dist --force-reinstall
-        python -c 'import panther'
+        pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
+        python -c 'import ZenithTA'
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
@@ -139,8 +139,8 @@ jobs:
           apt-get install -y --no-install-recommends python3 python3-pip
           pip3 install -U pip numpy
         run: |
-          pip3 install panther --no-deps --no-index --find-links dist/ --force-reinstall
-          python3 -c 'import panther'
+          pip3 install ZenithTA --no-deps --no-index --find-links dist/ --force-reinstall
+          python3 -c 'import ZenithTA'
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:

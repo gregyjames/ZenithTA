@@ -164,7 +164,7 @@ fn cmf(high: Vec<f32>, low: Vec<f32>, close: Vec<f32>, volume: Vec<f32>, period:
 }
 
 #[pymodule]
-fn panther(_py: Python, m: &PyModule) -> PyResult<()> {
+fn ZenithTA(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sma, m)?)?;
     m.add_function(wrap_pyfunction!(cmf, m)?)?;
     m.add_function(wrap_pyfunction!(atr, m)?)?;

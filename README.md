@@ -1,4 +1,4 @@
-[![Rust](https://github.com/gregyjames/Panther/actions/workflows/rust.yml/badge.svg?branch=main&event=push)](https://github.com/gregyjames/Panther/actions/workflows/rust.yml)
+[![Rust](https://github.com/gregyjames/ZenithTA/actions/workflows/rust.yml/badge.svg?branch=main&event=push)](https://github.com/gregyjames/Panther/actions/workflows/rust.yml)
 
 # ZenithTA
 #### Formerly Panther

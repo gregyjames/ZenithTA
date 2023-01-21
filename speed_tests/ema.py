@@ -1,12 +1,12 @@
 import pandas_datareader as pdr
 import pandas as pd
-from panther import *
+from ZenithTA import *
 from timeit import default_timer as timer
 from datetime import timedelta
 
 data = pdr.get_data_yahoo('NVDA')
 
-print("Timing Panther:")
+print("Timing ZenithTA:")
 start = timer()
 a = data['Close'].tolist()
 j = ema(a,4,2.0)
