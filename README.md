@@ -1,4 +1,9 @@
-[![Rust](https://github.com/gregyjames/ZenithTA/actions/workflows/rust.yml/badge.svg?branch=main&event=push)](https://github.com/gregyjames/Panther/actions/workflows/rust.yml)
+[![Rust](https://img.shields.io/github/actions/workflow/status/gregyjames/zenithta/rust.yml?style=for-the-badge)](https://github.com/gregyjames/ZenithTA/actions/workflows/rust.yml)
+[![PyPI](https://img.shields.io/pypi/v/zenithta?color=%230s0&style=for-the-badge)](https://pypi.org/project/zenithta/)
+[![License](https://img.shields.io/github/license/gregyjames/zenithta?color=%230sd&style=for-the-badge)](https://github.com/gregyjames/ZenithTA/blob/main/LICENSE)
+[![Count](https://img.shields.io/tokei/lines/github/gregyjames/zenithta?color=%230fs&style=for-the-badge)](https://github.com/gregyjames/ZenithTA/)
+
+
 
 # ZenithTA
 #### Formerly Panther
@@ -12,6 +17,9 @@ A efficient, high-performance python technical analysis library written in Rust 
 - RSI
 - MACD
 - ROC
+
+## How to install
+`pip3 install zenithta`
 
 ## How to build (Windows)
 - Run `cargo build --release` from the main directory.
