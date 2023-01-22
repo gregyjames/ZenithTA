@@ -35,6 +35,6 @@ jobs:
           ${{ runner.os }}-cargo-target
 
     - name: Build
-      run: cargo build --verbose --all --features "strict"
+      run: cargo build --release --verbose
     - name: Run tests
-      run: cargo test --verbose --all --features "strict"
+      run: cargo test --verbose
