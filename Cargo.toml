@@ -8,5 +8,21 @@ name = "ZenithTA"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.15.1", features = ["abi3-py36", "extension-module"] }
-numpy = "0.15"
+pyo3 = { version = "0.25.0", features = ["extension-module"] }
+numpy = "0.25.0"
+
+[build-dependencies]
+pyo3-build-config = "0.25.0"
+
+[env]
+PYTHON_SYS_EXECUTABLE = { value = "/opt/homebrew/bin/python3", force = true }
+PYO3_PYTHON = { value = "/opt/homebrew/bin/python3", force = true }
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
