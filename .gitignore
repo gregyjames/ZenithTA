@@ -19,3 +19,7 @@ Cargo.lock
 
 # Add for maturin
 dist/
+speed_tests/__pycache__/
+uv.lock
+
+*.lock
