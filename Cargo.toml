@@ -14,11 +14,6 @@ num-traits = "0.2"
 
 [build-dependencies]
 pyo3-build-config = "0.25.0"
-
-[env]
-PYTHON_SYS_EXECUTABLE = { value = "/opt/homebrew/bin/python3", force = true }
-PYO3_PYTHON = { value = "/opt/homebrew/bin/python3", force = true }
-
 [profile.dev]
 opt-level = 0
 debug = true
