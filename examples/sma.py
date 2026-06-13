@@ -7,9 +7,8 @@ from datetime import timedelta
 data = yf.download("NVDA", start="2023-01-01", end="2024-01-01")
 
 print("Timing ZenithTA:")
-a = data["Close"].to_numpy().flatten().astype("float32")
 start = timer()
-j = sma(a, 5)
+j = sma(data["Close"], 5)
 end = timer()
 print(timedelta(seconds=end - start))
 

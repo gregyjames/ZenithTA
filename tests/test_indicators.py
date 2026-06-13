@@ -135,3 +135,44 @@ def test_cmf():
         np.sum(mf_vol[2:5]) / np.sum(volume[2:5]),
     ]
     np.testing.assert_allclose(result, expected, rtol=1e-5)
+
+
+# --- Ergonomic and Type Dispatch Tests ---
+def test_ergonomics():
+    # 1. Test standard Python list
+    data_list = [1.0, 2.0, 3.0, 4.0, 5.0]
+    res_list = sma(data_list, 3)
+    np.testing.assert_allclose(res_list, [2.0, 3.0, 4.0])
+
+    # 2. Test Pandas Series (float64)
+    series = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    res_series = sma(series, 3)
+    np.testing.assert_allclose(res_series, [2.0, 3.0, 4.0])
+    assert res_series.dtype == np.float64
+
+    # 3. Test Pandas DataFrame Column (float64)
+    df = pd.DataFrame({"Close": [1.0, 2.0, 3.0, 4.0, 5.0]})
+    res_df = sma(df["Close"], 3)
+    np.testing.assert_allclose(res_df, [2.0, 3.0, 4.0])
+
+    # 4. Test 2D Column Vector (shape (N, 1))
+    col_vector = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]], dtype=np.float32)
+    res_col = sma(col_vector, 3)
+    np.testing.assert_allclose(res_col, [2.0, 3.0, 4.0])
+    assert res_col.dtype == np.float32
+
+    # 5. Test 2D Row Vector (shape (1, N))
+    row_vector = np.array([[1.0, 2.0, 3.0, 4.0, 5.0]], dtype=np.float64)
+    res_row = sma(row_vector, 3)
+    np.testing.assert_allclose(res_row, [2.0, 3.0, 4.0])
+    assert res_row.dtype == np.float64
+
+    # 6. Verify shape errors
+    invalid_2d = np.array([[1.0, 2.0], [3.0, 4.0]])
+    with pytest.raises(ValueError, match="2D array must be a column/row vector"):
+        sma(invalid_2d, 2)
+
+    invalid_3d = np.array([[[1.0]]])
+    with pytest.raises(ValueError, match="Input array must be 1D or a 2D column/row vector"):
+        sma(invalid_3d, 1)
+
