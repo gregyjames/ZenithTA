@@ -168,11 +168,13 @@ where
         let inv_period = T::one() / T::from(period).unwrap();
         
         let mut sum: T = price[0..period].iter().copied().fold(T::zero(), |a, b| a + b);
-        result_slice[0] = sum * inv_period;
+        *result_slice.get_unchecked_mut(0) = sum * inv_period;
         
         for i in 1..length {
-            sum = sum - price[i - 1] + price[i + period - 1];
-            result_slice[i] = sum * inv_period;
+            let prev = *price.get_unchecked(i - 1);
+            let next = *price.get_unchecked(i + period - 1);
+            sum = sum - prev + next;
+            *result_slice.get_unchecked_mut(i) = sum * inv_period;
         }
     }
     Ok(result_array)
@@ -198,9 +200,11 @@ where
         let weight = smoothing / (T::from(period).unwrap() + T::one());
         let one_minus_weight = T::one() - weight;
         
-        result_slice[0] = price[0];
+        *result_slice.get_unchecked_mut(0) = *price.get_unchecked(0);
         for i in 1..length {
-            result_slice[i] = price[i].mul_add(weight, result_slice[i - 1] * one_minus_weight);
+            let p_val = *price.get_unchecked(i);
+            let prev_r = *result_slice.get_unchecked(i - 1);
+            *result_slice.get_unchecked_mut(i) = p_val.mul_add(weight, prev_r * one_minus_weight);
         }
     }
     Ok(result_array)
@@ -249,13 +253,13 @@ where
         unsafe {
             let result_slice = result_array.as_slice_mut()?;
             for i in 0..len - 1 {
-                let change = prices[i + 1] - prices[i];
+                let change = *prices.get_unchecked(i + 1) - *prices.get_unchecked(i);
                 if change > T::zero() {
-                    result_slice[i] = val_100;
+                    *result_slice.get_unchecked_mut(i) = val_100;
                 } else if change < T::zero() {
-                    result_slice[i] = T::zero();
+                    *result_slice.get_unchecked_mut(i) = T::zero();
                 } else {
-                    result_slice[i] = val_50;
+                    *result_slice.get_unchecked_mut(i) = val_50;
                 }
             }
         }
@@ -266,7 +270,7 @@ where
         let mut sum_gain = T::zero();
         let mut sum_loss = T::zero();
         for i in 0..len - 1 {
-            let change = prices[i + 1] - prices[i];
+            let change = unsafe { *prices.get_unchecked(i + 1) - *prices.get_unchecked(i) };
             if change > T::zero() {
                 sum_gain = sum_gain + change;
             } else {
@@ -292,7 +296,7 @@ where
         let mut avg_loss = T::zero();
         
         for i in 0..period {
-            let change = prices[i + 1] - prices[i];
+            let change = *prices.get_unchecked(i + 1) - *prices.get_unchecked(i);
             if change > T::zero() {
                 avg_gain = avg_gain + change;
             } else {
@@ -304,14 +308,14 @@ where
         avg_loss = avg_loss * inv_period;
 
         if avg_loss == T::zero() {
-            result_slice[0] = val_100;
+            *result_slice.get_unchecked_mut(0) = val_100;
         } else {
-            result_slice[0] = val_100 - (val_100 / (T::one() + (avg_gain / avg_loss)));
+            *result_slice.get_unchecked_mut(0) = val_100 - (val_100 / (T::one() + (avg_gain / avg_loss)));
         }
 
         let p_minus_1 = T::from(period - 1).unwrap();
         for i in 1..len - period {
-            let change = prices[i + period] - prices[i + period - 1];
+            let change = *prices.get_unchecked(i + period) - *prices.get_unchecked(i + period - 1);
             let (gain, loss) = if change > T::zero() {
                 (change, T::zero())
             } else {
@@ -322,9 +326,9 @@ where
             avg_loss = (avg_loss * p_minus_1 + loss) * inv_period;
 
             if avg_loss == T::zero() {
-                result_slice[i] = val_100;
+                *result_slice.get_unchecked_mut(i) = val_100;
             } else {
-                result_slice[i] = val_100 - (val_100 / (T::one() + (avg_gain / avg_loss)));
+                *result_slice.get_unchecked_mut(i) = val_100 - (val_100 / (T::one() + (avg_gain / avg_loss)));
             }
         }
     }
@@ -341,10 +345,14 @@ where
     
     // Initial SMA
     let sum: T = price[0..period].iter().copied().fold(T::zero(), |a, b| a + b);
-    dest[0] = sum / T::from(period).unwrap();
-    
-    for i in 1..length {
-        dest[i] = dest[i - 1] + (price[i + period - 1] - dest[i - 1]) * alpha;
+    unsafe {
+        *dest.get_unchecked_mut(0) = sum / T::from(period).unwrap();
+        
+        for i in 1..length {
+            let prev_d = *dest.get_unchecked(i - 1);
+            let p_val = *price.get_unchecked(i + period - 1);
+            *dest.get_unchecked_mut(i) = prev_d + (p_val - prev_d) * alpha;
+        }
     }
 }
 
@@ -375,7 +383,7 @@ where
         let macd_slice = macd_array.as_slice_mut()?;
         let offset = period_slow - period_fast;
         for i in 0..macd_len {
-            macd_slice[i] = fast_ema[i + offset] - slow_ema[i];
+            *macd_slice.get_unchecked_mut(i) = *fast_ema.get_unchecked(i + offset) - *slow_ema.get_unchecked(i);
         }
         
         let signal_len = macd_len - period_signal + 1;
@@ -402,8 +410,9 @@ where
         let result_slice = result_array.as_slice_mut()?;
         let val_100 = T::from(100.0).unwrap();
         for i in 0..length {
-            let denom = price[i];
-            result_slice[i] = ((price[i + period] - denom) / denom) * val_100;
+            let denom = *price.get_unchecked(i);
+            let next_p = *price.get_unchecked(i + period);
+            *result_slice.get_unchecked_mut(i) = ((next_p - denom) / denom) * val_100;
         }
     }
     Ok(result_array)
@@ -437,12 +446,17 @@ where
     }
 
     let mut tr = vec![T::zero(); length];
-    tr[0] = high[0] - low[0];
-    for i in 1..length {
-        let hl = high[i] - low[i];
-        let hpc = (high[i] - close[i - 1]).abs();
-        let lpc = (low[i] - close[i - 1]).abs();
-        tr[i] = hl.max(hpc).max(lpc);
+    unsafe {
+        *tr.get_unchecked_mut(0) = *high.get_unchecked(0) - *low.get_unchecked(0);
+        for i in 1..length {
+            let h = *high.get_unchecked(i);
+            let l = *low.get_unchecked(i);
+            let c_prev = *close.get_unchecked(i - 1);
+            let hl = h - l;
+            let hpc = (h - c_prev).abs();
+            let lpc = (l - c_prev).abs();
+            *tr.get_unchecked_mut(i) = hl.max(hpc).max(lpc);
+        }
     }
     
     let result_len = length - period + 1;
@@ -452,11 +466,13 @@ where
         let inv_period = T::one() / T::from(period).unwrap();
         
         let mut sum: T = tr[0..period].iter().copied().fold(T::zero(), |a, b| a + b);
-        result_slice[0] = sum * inv_period;
+        *result_slice.get_unchecked_mut(0) = sum * inv_period;
         
         for i in 1..result_len {
-            sum = sum - tr[i - 1] + tr[i + period - 1];
-            result_slice[i] = sum * inv_period;
+            let prev_tr = *tr.get_unchecked(i - 1);
+            let next_tr = *tr.get_unchecked(i + period - 1);
+            sum = sum - prev_tr + next_tr;
+            *result_slice.get_unchecked_mut(i) = sum * inv_period;
         }
     }
     Ok(result_array)
@@ -482,11 +498,17 @@ where
     }
     
     let mut mfv = vec![T::zero(); length];
-    for i in 0..length {
-        let range = high[i] - low[i];
-        if range != T::zero() {
-            let money_flow_multiplier = ((close[i] - low[i]) - (high[i] - close[i])) / range;
-            mfv[i] = money_flow_multiplier * volume[i];
+    unsafe {
+        for i in 0..length {
+            let h = *high.get_unchecked(i);
+            let l = *low.get_unchecked(i);
+            let c = *close.get_unchecked(i);
+            let v = *volume.get_unchecked(i);
+            let range = h - l;
+            if range != T::zero() {
+                let money_flow_multiplier = ((c - l) - (h - c)) / range;
+                *mfv.get_unchecked_mut(i) = money_flow_multiplier * v;
+            }
         }
     }
     
@@ -497,12 +519,16 @@ where
         
         let mut mfv_sum: T = mfv[0..period].iter().copied().fold(T::zero(), |a, b| a + b);
         let mut vol_sum: T = volume[0..period].iter().copied().fold(T::zero(), |a, b| a + b);
-        result_slice[0] = mfv_sum / vol_sum;
+        *result_slice.get_unchecked_mut(0) = mfv_sum / vol_sum;
         
         for i in 1..result_len {
-            mfv_sum = mfv_sum - mfv[i - 1] + mfv[i + period - 1];
-            vol_sum = vol_sum - volume[i - 1] + volume[i + period - 1];
-            result_slice[i] = mfv_sum / vol_sum;
+            let prev_mfv = *mfv.get_unchecked(i - 1);
+            let next_mfv = *mfv.get_unchecked(i + period - 1);
+            let prev_vol = *volume.get_unchecked(i - 1);
+            let next_vol = *volume.get_unchecked(i + period - 1);
+            mfv_sum = mfv_sum - prev_mfv + next_mfv;
+            vol_sum = vol_sum - prev_vol + next_vol;
+            *result_slice.get_unchecked_mut(i) = mfv_sum / vol_sum;
         }
     }
     Ok(result_array)
