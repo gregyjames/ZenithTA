@@ -19,6 +19,8 @@ members = ["examples"]
 
 [tool.maturin]
 module-name = "ZenithTA"
+profile = "release"
+editable-profile = "release"
 
 [dependency-groups]
 dev = [
