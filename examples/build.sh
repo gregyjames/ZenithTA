@@ -1,0 +1,1 @@
+cd .. && uv tool run maturin develop && cd speed_tests && uv run pytest . -v
