@@ -6,30 +6,48 @@
 
 
 # ZenithTA
-#### Formerly Panther
-A efficient, high-performance python technical analysis library written in Rust using PyO3 and rust-numpy. 
+A ultra-efficient, zero-allocation, high-performance technical analysis library written in Rust using PyO3 and rust-numpy.
+
+## Features & Ergonomics
+- **Zero-Allocation & Zero-Copy Fast-Paths**: Directly borrows 1D and 2D contiguous arrays, Pandas Series, and DataFrame columns without copying or memory allocations.
+- **Dynamic Type Dispatch**: Seamlessly accepts and runs on both `float32` and `float64` input data.
+- **SIMD Optimized**: Compiles targeting host CPU native instruction sets (`target-cpu=native`).
+- **Bypassed Bounds Checking**: Hot calculation loops bypass bounds checks via unsafe unchecked accesses under strict safety constraints.
 
 ## Indicators
-- ATR
-- CMF
-- SMA
-- EMA
-- RSI
-- MACD
-- ROC
+- **ATR** (Average True Range)
+- **CMF** (Chaikin Money Flow)
+- **SMA** (Simple Moving Average)
+- **EMA** (Exponential Moving Average)
+- **RSI** (Relative Strength Index)
+- **MACD** (Moving Average Convergence Divergence)
+- **ROC** (Rate of Change)
 
 ## How to install
-`pip3 install zenithta`
+```bash
+pip install zenithta
+```
 
-## How to build (Windows)
-- Run `cargo build --release` from the main directory.
-- Get the generated dll from the target/release directory.
-- Rename extension from .dll to .pyd.
-- Place .pyd file in the same folder as script. 
-- Put `from panther import *` in python script.
- 
+## How to build locally
+We use `uv` and `maturin` to manage, build, and run the library. To build the extension in release mode and install it in your environment:
+```bash
+# Rebuild and install the local package
+uv sync --reinstall-package ZenithTA
+```
+
+Usage in Python:
+```python
+import numpy as np
+import pandas as pd
+from ZenithTA import sma
+
+# Works out of the box with zero-copy on various formats:
+prices = pd.Series([10.0, 11.0, 12.0, 13.0, 14.0])
+result = sma(prices, period=3)
+```
+
 ## Speed
-On average, I found the Panther calculations of these indicators to be about 9x or 900% faster than the industry standard way of calculating these indicators using Pandas. Don't believe me? Install the library and run the tests in the speed_tests directory to see it for yourself :)
+ZenithTA calculations are heavily optimized and can be significantly faster than standard Pandas/NumPy operations due to compiled SIMD instructions, unchecked loop arithmetic, and lack of layout copying/allocation overhead. Run `uv run python examples/sma.py` to see the performance benchmarks on your system.
 
 ## License
 MIT License
