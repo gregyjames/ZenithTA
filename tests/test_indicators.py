@@ -5,13 +5,13 @@ from ZenithTA import sma, ema, rsi, macd, roc, atr, cmf
 
 # --- SMA Tests ---
 def test_sma():
-    data = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    data = np.array([1.0, 2.0, 3.0, 4.0, 5.0], dtype=np.float32)
     result = sma(data, 3)
-    expected = np.array([2.0, 3.0, 4.0])
+    expected = np.array([2.0, 3.0, 4.0], dtype=np.float32)
     np.testing.assert_allclose(result, expected, rtol=1e-5)
 
     # Constant values
-    result_const = sma(np.array([5.0, 5.0, 5.0]), 2)
+    result_const = sma(np.array([5.0, 5.0, 5.0], dtype=np.float32), 2)
     np.testing.assert_allclose(result_const, [5.0, 5.0], rtol=1e-5)
 
     # Error on period too large
@@ -94,9 +94,9 @@ def test_roc():
 
 # --- ATR Tests ---
 def test_atr():
-    high = np.array([10.0, 11.0, 12.0, 13.0, 14.0])
-    low = np.array([9.0, 10.0, 11.0, 12.0, 13.0])
-    close = np.array([9.5, 10.5, 11.5, 12.5, 13.5])
+    high = np.array([10.0, 11.0, 12.0, 13.0, 14.0], dtype=np.float32)
+    low = np.array([9.0, 10.0, 11.0, 12.0, 13.0], dtype=np.float32)
+    close = np.array([9.5, 10.5, 11.5, 12.5, 13.5], dtype=np.float32)
     
     result = atr(high, low, close, 3)
     
