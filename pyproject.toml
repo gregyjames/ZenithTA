@@ -10,12 +10,18 @@ requires-python = ">=3.8"
 license = { file = "LICENSE" }
 dependencies = [
     "numpy>=1.26.0",
-    "pandas>=2.2.0"
+    "pandas>=2.2.0",
+    "yfinance>=0.2.61",
 ]
 
 [tool.uv.workspace]
-members = ["speed_tests"]
+members = ["examples"]
 
 [tool.maturin]
-python-source = "."
 module-name = "ZenithTA"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "maturin>=1.14.0",
+]

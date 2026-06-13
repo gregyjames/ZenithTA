@@ -23,3 +23,5 @@ speed_tests/__pycache__/
 uv.lock
 
 *.lock
+examples/__pycache__
+tests/__pycache__
