@@ -37,7 +37,7 @@ jobs:
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
-          args: --release --universal2 --out dist --no-sdist
+          args: --release --universal2 --out dist
       - name: Install built wheel & run tests - universal2
         run: |
           uv pip install --system ZenithTA --no-deps --no-index --find-links dist --force-reinstall
@@ -71,7 +71,7 @@ jobs:
         uses: messense/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --no-sdist
+          args: --release --out dist
       - name: Install built wheel & run tests
         run: |
           uv pip install --system numpy pandas pytest
@@ -102,7 +102,7 @@ jobs:
         rust-toolchain: nightly
         target: ${{ matrix.target }}
         manylinux: auto
-        args: --release --out dist --no-sdist
+        args: --release --out dist
     - name: Install built wheel & run tests
       run: |
         uv pip install --system numpy pandas pytest
