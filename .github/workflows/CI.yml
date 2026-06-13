@@ -13,9 +13,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: 3.14
           architecture: x64
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -54,9 +54,9 @@ jobs:
         target: [x86]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: 3.14
           architecture: ${{ matrix.target }}
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -87,9 +87,9 @@ jobs:
         target: [x86_64, i686]
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v6
       with:
-        python-version: 3.9
+        python-version: 3.14
         architecture: x64
     - name: Build wheels
       uses: messense/maturin-action@v1
@@ -117,9 +117,9 @@ jobs:
         target: [aarch64, armv7, s390x, ppc64le]
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v6
       with:
-        python-version: 3.9
+        python-version: 3.14
     - name: Build wheels
       uses: messense/maturin-action@v1
       with:
