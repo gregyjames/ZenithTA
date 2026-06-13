@@ -42,7 +42,7 @@ jobs:
           pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
           python -c 'import ZenithTA'
       - name: Upload wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
           name: wheels
           path: dist
@@ -75,7 +75,7 @@ jobs:
           pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
           python -c 'import ZenithTA'
       - name: Upload wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
           name: wheels
           path: dist
@@ -105,7 +105,7 @@ jobs:
         pip install ZenithTA --no-deps --no-index --find-links dist --force-reinstall
         python -c 'import ZenithTA'
     - name: Upload wheels
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v7
       with:
         name: wheels
         path: dist
@@ -142,7 +142,7 @@ jobs:
           pip3 install ZenithTA --no-deps --no-index --find-links dist/ --force-reinstall
           python3 -c 'import ZenithTA'
     - name: Upload wheels
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v7
       with:
         name: wheels
         path: dist
