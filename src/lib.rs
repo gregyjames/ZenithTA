@@ -15,17 +15,6 @@ fn sma_helper(price_ndarray: &Array1<f32>, period: usize) -> Array1<f32>{
     result
 }
 
-fn ema_helper(price_ndarray: &Array1<f32>, period: usize) -> Array1<f32>{
-    let length = price_ndarray.len() - period +1;
-    let mut result = Array1::<f32>::zeros(length);
-    result[0] = price_ndarray.slice(s![0..period]).sum();
-    for i in 1..length{
-        result[i] = result[i-1]+(price_ndarray[i+period-1]-result[i-1])*(2.0/((period as f32)+1.0));
-    }
-    
-    result
-}
-
 //Indicator Python function wrappers
 #[pyfunction]
 fn sma(price: Vec<f32>, period: usize) -> PyResult<Vec<f32>> {
@@ -59,48 +48,19 @@ fn ema(price: Vec<f32>, period: usize, smoothing: f32) -> PyResult<Vec<f32>> {
 
 #[pyfunction]
 fn rsi(price: Vec<f32>, period: usize) -> PyResult<Vec<f32>>{
-    let price_ndarray = Array::from_vec(price);
-    let mut change = Array1::<f32>::zeros(price_ndarray.len());
-    let mut gain = Array1::<f32>::zeros(price_ndarray.len());
-    let mut loss = Array1::<f32>::zeros(price_ndarray.len());
-    let mut ag = Array1::<f32>::zeros(price_ndarray.len());
-    let mut al = Array1::<f32>::zeros(price_ndarray.len());
-    let mut result = Array1::<f32>::zeros(price_ndarray.len());
-    for i in 1..price_ndarray.len(){
-        change[i] = price_ndarray[i] - price_ndarray[i-1];
-        if change[i] == 0.0{
-            gain[i] = 0.0;
-            loss[i] = 0.0;
-        } else if change[i]<0.0{
-            gain[i] = 0.0;
-            loss[i] = (change[i]).abs();
-        }else{
-            gain[i] = change[i];
-            loss[i] = 0.0;
-        }
-    }
-    ag[period] = gain.slice(s![1..period+1]).sum()/(period as f32);
-    al[period] = loss.slice(s![1..period+1]).sum()/(period as f32);
-    
-    for i in period+1..price_ndarray.len(){
-        ag[i] = (ag[i-1]*(period as f32-1.0)+gain[i])/period as f32;
-        al[i] = (al[i-1]*(period as f32-1.0)+loss[i])/period as f32;
-    }
-    for i in period+1..price_ndarray.len(){
-        result[i] = 100.0-(100.0/(1.0+ag[i]/al[i]))
-    }
-
-    //result.slice(s![period..]).to_owned()
-    Ok(Array::to_vec(&(result.slice(s![period..]).to_owned())))
+    let price: Vec<f64> = price.iter().map(|&p| p as f64).collect();
+    let result = fin_primitives::signals::batch_f64::rsi(&price, period);
+    Ok(result.iter().skip(period).map(|&v| v as f32).collect())
 }
 
 #[pyfunction]
 fn macd(price: Vec<f32>, period_fast: usize, period_slow: usize, period_signal: usize) -> PyResult<(Vec<f32>,Vec<f32>)>{
-    let price_ndarray = Array::from_vec(price);
-    let line = ema_helper(&price_ndarray, period_fast).slice(s![period_slow-period_fast..]).to_owned() - ema_helper(&price_ndarray,period_slow);
-    let signal = ema_helper(&price_ndarray, period_signal);
+    let price: Vec<f64> = price.iter().map(|&p| p as f64).collect();
+    let (line, signal, _) = fin_primitives::signals::batch_f64::macd(&price, period_fast, period_slow, period_signal);
+    let line = line.iter().skip(period_slow - 1).map(|&v| v as f32).collect();
+    let signal = signal.iter().skip(period_slow + period_signal - 2).map(|&v| v as f32).collect();
 
-    Ok((Array::to_vec(&line), Array::to_vec(&signal)))
+    Ok((line, signal))
 }
 
 #[pyfunction]
@@ -175,3 +135,26 @@ fn ZenithTA(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn macd_signal_is_ema_of_macd_line() {
+        // On a straight line the 12/26 EMAs lag by 5.5 and 12.5 bars, so MACD and its signal are both 7.
+        let price: Vec<f32> = (0..100).map(|i| i as f32).collect();
+        let (line, signal) = macd(price, 12, 26, 9).unwrap();
+        assert_eq!(line.len(), 75);
+        assert_eq!(signal.len(), 67);
+        assert!(line.iter().chain(&signal).all(|v| (v - 7.0).abs() < 1e-4));
+    }
+
+    #[test]
+    fn rsi_first_value_is_computed() {
+        let price: Vec<f32> = (0..30).map(|i| i as f32).collect();
+        let result = rsi(price, 14).unwrap();
+        assert_eq!(result.len(), 16);
+        assert!(result.iter().all(|&v| v == 100.0));
+    }
+}
