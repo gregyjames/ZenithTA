@@ -10,3 +10,4 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.15.1", features = ["abi3-py36", "extension-module"] }
 numpy = "0.15"
+fin-primitives = { version = "4.0.1", default-features = false, features = ["indicators"] }
